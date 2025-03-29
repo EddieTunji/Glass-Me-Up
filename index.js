@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-    fetchGlasses(); // Fetch glasses data when the page loads
+    fetchGlasses(); 
 });
 
-// Fetch data from db.json
 function fetchGlasses() {
-    fetch("http://localhost:3000/glasses")  // Change if using an API
+    fetch("http://localhost:3000/glasses") 
         .then(response => response.json())
         .then(data => {
             displayGlasses(data);
@@ -12,7 +11,6 @@ function fetchGlasses() {
         .catch(error => console.error("Error fetching glasses:", error));
 }
 
-// Display glasses on the page
 function displayGlasses(glasses) {
     const summerContainer = document.getElementById("summer-glasses");
     const winterContainer = document.getElementById("winter-glasses");
@@ -37,10 +35,9 @@ function displayGlasses(glasses) {
         }
     });
 
-    addCartEventListeners(); // Attach event listeners after displaying items
+    addCartEventListeners();
 }
 
-// 1️⃣ Event Listener for adding to cart
 function addCartEventListeners() {
     document.querySelectorAll(".add-to-cart").forEach(button => {
         button.addEventListener("click", event => {
@@ -66,7 +63,6 @@ function updateCart(glass) {
     cartContainer.appendChild(cartItem);
 }
 
-// 2️⃣ Event Listener for search functionality
 document.getElementById("search").addEventListener("input", event => {
     const query = event.target.value.toLowerCase();
     fetch("http://localhost:3000/glasses")
@@ -77,7 +73,6 @@ document.getElementById("search").addEventListener("input", event => {
         });
 });
 
-// 3️⃣ Event Listener for filtering by season
 document.getElementById("filter").addEventListener("change", event => {
     const season = event.target.value;
     fetch("http://localhost:3000/glasses")
