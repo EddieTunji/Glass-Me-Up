@@ -1,84 +1,71 @@
 document.addEventListener("DOMContentLoaded", () => {
-    fetchGlasses(); 
-});
-
-function fetchGlasses() {
-    fetch("http://localhost:3000/glasses") 
+    let cart = [];
+    
+    // Load glasses from db.json
+    fetch("db.json")
         .then(response => response.json())
         .then(data => {
-            displayGlasses(data);
-        })
-        .catch(error => console.error("Error fetching glasses:", error));
-}
+            const summerGlasses = document.getElementById("summer-glasses");
+            const winterGlasses = document.getElementById("winter-glasses");
 
-function displayGlasses(glasses) {
-    const summerContainer = document.getElementById("summer-glasses");
-    const winterContainer = document.getElementById("winter-glasses");
+            data.glasses.forEach(glass => {
+                const glassDiv = document.createElement("div");
+                glassDiv.classList.add("glass-item");
+                glassDiv.innerHTML = `
+                    <img src="${glass.image}" alt="${glass.name}">
+                    <h3>${glass.name}</h3>
+                    <p>Price: $${glass.price}</p>
+                    <button class="add-to-cart" data-id="${glass.id}">Add to Cart</button>
+                `;
+                if (glass.season === "summer") {
+                    summerGlasses.appendChild(glassDiv);
+                } else {
+                    winterGlasses.appendChild(glassDiv);
+                }
+            });
+        });
 
-    summerContainer.innerHTML = "";
-    winterContainer.innerHTML = "";
-
-    glasses.forEach(glass => {
-        const glassDiv = document.createElement("div");
-        glassDiv.classList.add("glass-item");
-        glassDiv.innerHTML = `
-            <img src="${glass.image}" alt="${glass.name}">
-            <h3>${glass.name}</h3>
-            <p>$${glass.price}</p>
-            <button class="add-to-cart" data-id="${glass.id}">Add to Cart</button>
-        `;
-
-        if (glass.season === "summer") {
-            summerContainer.appendChild(glassDiv);
-        } else {
-            winterContainer.appendChild(glassDiv);
+    // Add event listener for adding items to cart
+    document.addEventListener("click", (event) => {
+        if (event.target.classList.contains("add-to-cart")) {
+            const glassId = event.target.getAttribute("data-id");
+            addToCart(glassId);
         }
     });
 
-    addCartEventListeners();
-}
-
-function addCartEventListeners() {
-    document.querySelectorAll(".add-to-cart").forEach(button => {
-        button.addEventListener("click", event => {
-            const id = event.target.dataset.id;
-            addToCart(id);
-        });
+    // Add event listener for clearing cart
+    document.getElementById("clear-cart").addEventListener("click", () => {
+        cart = [];
+        updateCart();
     });
-}
 
-function addToCart(id) {
-    fetch(`http://localhost:3000/glasses/${id}`)
-        .then(response => response.json())
-        .then(glass => {
-            updateCart(glass);
-        })
-        .catch(error => console.error("Error adding to cart:", error));
-}
+    // Function to add items to cart
+    function addToCart(glassId) {
+        fetch("db.json")
+            .then(response => response.json())
+            .then(data => {
+                const selectedGlass = data.glasses.find(glass => glass.id == glassId);
+                if (selectedGlass) {
+                    cart.push(selectedGlass);
+                    updateCart();
+                }
+            });
+    }
 
-function updateCart(glass) {
-    const cartContainer = document.getElementById("cart-items");
-    const cartItem = document.createElement("div");
-    cartItem.innerHTML = `<p>${glass.name} - $${glass.price}</p>`;
-    cartContainer.appendChild(cartItem);
-}
+    // Function to update cart display
+    function updateCart() {
+        const cartItems = document.getElementById("cart-items");
+        const cartTotal = document.getElementById("cart-total");
+        cartItems.innerHTML = "";
 
-document.getElementById("search").addEventListener("input", event => {
-    const query = event.target.value.toLowerCase();
-    fetch("http://localhost:3000/glasses")
-        .then(response => response.json())
-        .then(data => {
-            const filtered = data.filter(glass => glass.name.toLowerCase().includes(query));
-            displayGlasses(filtered);
+        let total = 0;
+        cart.forEach(item => {
+            total += item.price;
+            const li = document.createElement("li");
+            li.textContent = `${item.name} - $${item.price}`;
+            cartItems.appendChild(li);
         });
-});
 
-document.getElementById("filter").addEventListener("change", event => {
-    const season = event.target.value;
-    fetch("http://localhost:3000/glasses")
-        .then(response => response.json())
-        .then(data => {
-            const filtered = season === "all" ? data : data.filter(glass => glass.season === season);
-            displayGlasses(filtered);
-        });
+        cartTotal.textContent = total.toFixed(2);
+    }
 });

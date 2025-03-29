@@ -1,87 +1,80 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const glassesData = {
-        "glasses": [
-            {
-                "id": 1,
-                "name": "Urban Optics",
-                "image": "https://atttpgdeen.cloudimg.io/cdn/n/n/https://masterdb.co.uk/mylux_images/ray-ban/rayban_0rb0316s_136748_grey_on_black_polarized.jpg",
-                "price": 29.99,
-                "season": "summer"
-            },
-            {
-                "id": 2,
-                "name": "Sunset Glaze",
-                "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr8OmPUs5LUIB7CiPSYvVZGy8cEB7BxUcInw&s",
-                "price": 34.99,
-                "season": "summer"
-            },
-            {
-                "id": 3,
-                "name": "Vista Shades",
-                "image": "https://images2.ray-ban.com//cdn-record-files-pi/34bad6ec-190a-4a40-987c-ad2500e14d02/0f66bc61-b98f-4dc5-9029-ad27017106c6/0RB3683__002_31__STD__shad__al2.png?impolicy=RB_Product_clone&width=700&bgc=%23f2f2f2",
-                "price": 29.99,
-                "season": "summer"
-            },
-            {
-                "id": 4,
-                "name": "Clear Horizon",
-                "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRB1_vnpZFjYOGchw4hhrIsJKZg15blI1ijSQ&s",
-                "price": 34.99,
-                "season": "summer"
-            },
-            {
-                "id": 5,
-                "name": "LuxeGlide",
-                "image": "https://www.datocms-assets.com/45158/1696496417-sungod-ambassador-day-high-res-revelstoke-090322-photos-by-olly-hogan-oldxtrip-29.jpg?auto=format&fit=crop&w=1920&h=1080",
-                "price": 39.99,
-                "season": "winter"
-            },
-            {
-                "id": 6,
-                "name": "Zenyith Shades",
-                "image": "https://ca.pitviper.com/cdn/shop/files/Untitleddesign_39_f076589b-e49c-4b64-baeb-95debf28cbdd.png?v=1738772296",
-                "price": 44.99,
-                "season": "winter"
-            },
-            {
-                "id": 7,
-                "name": "Bando Shades",
-                "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtNQBY_g44k12OQzmR7oMwAlY5oaPp1tDdtQ&s",
-                "price": 39.99,
-                "season": "winter"
-            },
-            {
-                "id": 8,
-                "name": "Snow Vision",
-                "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgGofSbpNQ3oSrM4SzJxzYH6X_p6b5EmvOGQ&s",
-                "price": 44.99,
-                "season": "winter"
-            }
-        ]
-    };
+document.addEventListener("DOMContentLoaded", () => {
+    let allGlasses = []; // Store all glasses
+    let cart = []; // Store cart items
 
-    function renderGlasses() {
-        const summerContainer = document.getElementById("summer-glasses");
-        const winterContainer = document.getElementById("winter-glasses");
+    // Fetch glasses from db.json and display them
+    fetch("db.json")
+        .then(response => response.json())
+        .then(data => {
+            allGlasses = data.glasses;
+            displayGlasses(allGlasses);
+        });
 
-        glassesData.glasses.forEach(glass => {
-            const glassElement = document.createElement("div");
-            glassElement.classList.add("glass-item");
+    function displayGlasses(glasses) {
+        const summerGlasses = document.getElementById("summer-glasses");
+        const winterGlasses = document.getElementById("winter-glasses");
 
-            glassElement.innerHTML = `
-            <img src="${glass.image}" alt="${glass.name}" />
-            <h3>${glass.name}</h3>
-            <p>$${glass.price.toFixed(2)}</p>
-            <button>Add to Cart</button>
+        summerGlasses.innerHTML = "";
+        winterGlasses.innerHTML = "";
+
+        glasses.forEach(glass => {
+            const glassDiv = document.createElement("div");
+            glassDiv.classList.add("glass-item");
+            glassDiv.innerHTML = `
+                <img src="${glass.image}" alt="${glass.name}">
+                <h3>${glass.name}</h3>
+                <p>Price: $${glass.price}</p>
+                <button class="add-to-cart" data-id="${glass.id}">Add to Cart</button>
             `;
 
             if (glass.season === "summer") {
-                summerContainer.appendChild(glassElement);
+                summerGlasses.appendChild(glassDiv);
             } else {
-                winterContainer.appendChild(glassElement);
+                winterGlasses.appendChild(glassDiv);
             }
         });
     }
 
-    renderGlasses();
+    // Fix search functionality
+    document.getElementById("search-input").addEventListener("input", (event) => {
+        const searchText = event.target.value.toLowerCase();
+        const filteredGlasses = allGlasses.filter(glass =>
+            glass.name.toLowerCase().includes(searchText)
+        );
+        displayGlasses(filteredGlasses);
+    });
+
+    // Cart Functionality
+    const cartItems = document.getElementById("cart-items");
+    const cartTotal = document.getElementById("cart-total");
+
+    document.addEventListener("click", (event) => {
+        if (event.target.classList.contains("add-to-cart")) {
+            const glassId = parseInt(event.target.dataset.id);
+            const glass = allGlasses.find(item => item.id === glassId);
+
+            if (glass) {
+                cart.push(glass);
+                updateCartDisplay();
+            }
+        }
+    });
+
+    document.getElementById("checkout").addEventListener("click", () => {
+        alert("Proceeding to checkout...");
+    });
+
+    function updateCartDisplay() {
+        cartItems.innerHTML = "";
+        let total = 0;
+
+        cart.forEach((item, index) => {
+            const li = document.createElement("li");
+            li.textContent = `${item.name} - $${item.price}`;
+            cartItems.appendChild(li);
+            total += item.price;
+        });
+
+        cartTotal.textContent = total.toFixed(2);
+    }
 });

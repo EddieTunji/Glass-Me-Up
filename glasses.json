@@ -1,0 +1,30 @@
+{
+  "summer": [
+      {
+          "id": 1,
+          "name": "Sunset Glaze",
+          "price": 34.99,
+          "image": "assets/sunset-glaze.jpg"
+      },
+      {
+          "id": 2,
+          "name": "Clear Horizon",
+          "price": 34.99,
+          "image": "assets/clear-horizon.jpg"
+      }
+  ],
+  "winter": [
+      {
+          "id": 3,
+          "name": "Zenith Shades",
+          "price": 44.99,
+          "image": "assets/zenith-shades.jpg"
+      },
+      {
+          "id": 4,
+          "name": "Bando Shades",
+          "price": 39.99,
+          "image": "assets/bando-shades.jpg"
+      }
+  ]
+}
